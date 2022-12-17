@@ -1,19 +1,35 @@
-require("dotenv").config()
 const express = require("express")
 const cors = require("cors")
-const dbConnect = require("./db")
-const movieRouter = require("./routes/movie")
+const cookieParser=require("cookie-parser")
+
+require("dotenv").config()
+const { dbConnect } = require("./config/db")
+const  userRoutes  = require("./routes/userRoute")
+const  todoRoutes  = require("./routes/todoRoute")
+const  taskRoutes  = require("./routes/taskRoute")
+
 const app = express()
-
-dbConnect()
 app.use(express.json())
-app.use(cors())
+app.use(express.urlencoded({extended:true}));
+app.use(cookieParser());
 
-app.use("/api", movieRouter)
+app.use(cors({
+    origin: "*"
+}))
 
-app.use("/", (req, res) => {
-    res.send("Welcome")
+//db
+dbConnect()
+
+app.get("/", (req, res) => {
+    res.send("Welocme to TODO App")
 })
+app.use("/api/users", userRoutes);
 
-const port = process.env.PORT || 8080
-app.listen(port, () => console.log(`Listening on port:${port}... `))
+app.use("/api", taskRoutes);
+app.use("/api", todoRoutes);
+
+const port = process.env.PORT
+
+app.listen(port, () => {
+    console.log(`Listening on port ${port}`)
+})
