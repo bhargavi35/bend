@@ -58,7 +58,7 @@ const updateTodos = async (req, res) => {
             todo.color = color;
             // console.log(todo)
             const updateTodo = await Todo.findByIdAndUpdate(todoId, todo);
-            res.send({ msg: "Note updated successfully", todo });
+            res.send({ msg: "Note updated successfully", updatedTodo:todo });
         }
     } catch (err) {
         res.status(401).json({

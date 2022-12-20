@@ -5,7 +5,7 @@ const router = express.Router()
 
 router.get("/getTodos",authentication, getTodos)
 router.post("/createTodos",authentication, createTodos)
-router.patch("/updateTodos/:todoId",authentication, updateTodos)
+router.put("/updateTodos/:todoId",authentication, updateTodos)
 router.delete("/deleteTodos/:todoId",authentication, deleteTodos)
 router.get("/searchTodos",authentication, searchTodos)
 

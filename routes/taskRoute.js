@@ -5,7 +5,7 @@ const router = express.Router()
 
 router.get("/getTasks/:todoId",authentication, getTasks)
 router.post("/addTask/:todoId",authentication, addTask)
-router.patch("/updateTask/:todoId/:taskId",authentication, updateTask)
+router.put("/updateTask/:todoId/:taskId",authentication, updateTask)
 router.delete("/deleteTask/:todoId/:taskId",authentication, deleteTask)
 router.get("/checkTask/:todoId/:taskId",authentication, checkTask)
 
