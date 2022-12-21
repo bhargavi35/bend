@@ -1,25 +1,21 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      require: [true, "name is mandatory"]
-    },
-    email: {
-      type: String,
-      required: [true, "email is mandatory"],
-    },
-    password: {
-      type: String,
-      minLength: [8, "password can't be less than 8 characters"],
-      required: [true, "pasword is mandatory"],
-    },
-  },
-  {
-    versionKey: false,
-    timestamps: true,
-  }
-);
+const UserSchema = new mongoose.Schema(
+    {
+        name:{
+            type:String,
+            require:[true, "name is compulsory"]
+        },
+        email:{
+            type: String,
+            require: [true, "email is compulsory"]
+        },
+        password: {
+            type: String,
+            minLength: [8, "password cannot be less than 8 characters"],
+            require: [true, "password is required"]
+        }
+    }
+)
 
-module.exports = new mongoose.model("user", userSchema);
+module.exports = new mongoose.model("user", UserSchema);

@@ -1,89 +1,167 @@
-const Todo = require("../models/Todo");
+const Todo = require('../models/Todo');
 
-//getTasks
-const getTasks = async (req, res) => {
-    try {
-        const { todoId } = req.params;
-        const checkTodo = await Todo.findById(todoId);
-        if (!checkTodo) {
-            throw new Error("no such Todo..");
-        }
+// get all task from specific todo  
+exports.getTasksController = async (req, res)=>{
+
+    try{
+        const {todoId} = req.params;
+        const checkTodoExists = await Todo.findById(todoId);
+        if(!checkTodoExists)
+            throw new Error("no such todo exists");
+        
         const todo = await Todo.findById(todoId);
         const tasks = todo.tasks;
-        res.send({ msg: "Todos Successfully Retrieved", tasks });
-    } catch (err) {
+        res.status(200).json({
+            success: true,
+            message: "tasks successfully retrieved",
+            tasks
+        })
+    }
+    catch(err){
         res.status(401).json({
             success: false,
             message: err.message,
-        });
+        })
     }
-};
 
-//addTask
-const addTask = async (req, res) => {
-    try {
-        const { todoId } = req.params;
-        const checkTodo = await Todo.findById(todoId);
-        if (!checkTodo) {
-            throw new Error("no such Todo..");
-        }
+}
+
+// create tasks 
+exports.addTaskController = async (req, res)=>{
+    try{
+
+        const {todoId} = req.params;
+        const checkTodoExists = await Todo.findById(todoId);
+        if(!checkTodoExists)
+            throw new Error("no such todo exists");
+        
         const todo = await Todo.findById(todoId);
-        //insert task
-        todo.tasks.push({ main: req.body.main, taskupdatedAt: new Date() });
+
+        // inserting task 
+        todo.tasks.push({main: req.body.main, taskupdatedAt:new Date()});
         const savedTask = await Todo.findByIdAndUpdate(todoId, todo);
-        res.send({ msg: "Task created successfully", new_task: savedTask });
+        res.status(200).json({
+            success: true,
+            message: "tasks successfully added",
+            todo
+        })
     }
-    catch (err) {
+    catch(err){
         res.status(401).json({
             success: false,
             message: err.message,
-        });
+        })
     }
-};
+}
 
-///update
-const updateTask = async (req, res) => {
-    try {
-        const { todoId, taskId } = req.params;
-        console.log(req.user)
-        const checkTodo = await Todo.findById(todoId);
-        if (!checkTodo) {
-            throw new Error("no such Todo..");
-        }
-
+// check and uncheck task for showing complete or not 
+exports.checkUnCheckTaskController = async (req, res)=>{
+    try{
+        
+        const {todoId, taskId} = req.params;
+        const checkTodoExists = await Todo.findById(todoId);
+        if(!checkTodoExists)
+         throw new Error("no such todo exists");
+         
         const todo = await Todo.findById(todoId);
-        const checkTask = todo.tasks.filter((ele) => (ele._id = taskId));
-        // console.log(checkTask)
-        if (checkTask.length === 0) {
-            throw new Error("no such task..");
-        }
-        //new task
-        const updatedTasks = todo.tasks.map((ele) => {
-            if (ele._id == taskId) {
-                ele.main = req.body.main;
-                ele.taskupdatedAt = new Date()
-                return ele;
-            }
-            else
-                return ele;
-        });
+        const checkTaskExist = todo.tasks.filter(e=>e._id==taskId);
+        // console.log(checkTaskExist)
 
-        //update tod with task
+        if(checkTaskExist.length==0)
+         throw new Error("no such task exists");
+
+        // creating new task with checked or unchecked targeted task 
+        const updatedTasks = todo.tasks.map(e=>{
+            if(e._id==taskId){
+                if(e.checked){
+                    e.checked = false;
+                }
+                else{
+                    e.checked = true;
+                }
+                return e;
+            }
+            
+            else
+                return e;
+            
+        })
+
+        // then updating todo with new tasks 
         todo.tasks = updatedTasks;
         const updatedTodo = await Todo.findByIdAndUpdate(todoId, todo);
-        res.send({ msg: "tasks successfully updated" , updatedTodo});
+
+
+        res.status(200).json({
+            success: true,
+            message: "tasks successfully checked/unchecked",
+            todo
+        })
 
     }
-    catch (err) {
+    catch(err){
         res.status(401).json({
             success: false,
             message: err.message,
-        });
+        })
     }
-};
+}
 
-//delete
-const deleteTask = async (req, res)=>{
+// editing task 
+exports.editTaskController = async (req, res)=>{
+    try{
+
+        const {todoId, taskId} = req.params;
+        console.log(req.user)
+        const checkTodoExists = await Todo.findById(todoId);
+        if(!checkTodoExists)
+         throw new Error("no such todo exists");
+         
+        const todo = await Todo.findById(todoId);
+        const checkTaskExist = todo.tasks.filter(e=>e._id==taskId);
+        // console.log(checkTaskExist)
+
+        if(checkTaskExist.length==0)
+         throw new Error("no such task exists");
+
+
+
+        // creating new task with new targeted task 
+        const updatedTasks = todo.tasks.map(e=>{
+            if(e._id==taskId){
+                e.main = req.body.main;
+                e.taskupdatedAt = new Date()
+                return e;
+            }
+            
+            else
+                return e;
+            
+        })
+
+        // then updating todo with new tasks 
+        todo.tasks = updatedTasks;
+        const updatedTodo = await Todo.findByIdAndUpdate(todoId, todo);
+
+
+        res.status(200).json({
+            success: true,
+            message: "tasks successfully checked/unchecked",
+            todo
+        })
+    }
+    catch(err){
+        res.status(401).json({
+            success: false,
+            message: err.message,
+        })
+    }
+
+}
+
+
+
+exports.deleteTaskController = async (req, res)=>{
     try{
         const {todoId, taskId} = req.params;
         const checkTodoExists = await Todo.findById(todoId);
@@ -118,53 +196,3 @@ const deleteTask = async (req, res)=>{
         })
     }
 }
-//search & change complete or not given task
-const checkTask = async (req, res) => {
-    try {
-        const { todoId, taskId } = req.params;
-        const checkTodo = await Todo.findById(todoId);
-        if (!checkTodo) {
-            throw new Error("no such Todo..");
-        }
-        const todo = await Todo.findById(todoId);
-        const checkTask = todo.tasks.filter((ele) => (ele._id = taskId));
-        // console.log(checkTask)
-        
-        if (checkTask.length == 0) {
-            throw new Error("no such task..");
-        }
-
-        //tick done or not
-        const updatedTasks = todo.tasks.map((ele) => {
-            if (ele._id === taskId) {
-                if (ele.checked) {
-                    ele.checked = false;
-                } else {
-                    ele.checked = true;
-                }
-                return ele;
-            } else {
-                return ele;
-            }
-        });
-
-        //update with new
-        todo.tasks = updatedTasks;
-        const updatedTodo = await Todo.findByIdAndUpdate(todoId, todo);
-        res.send({ msg: "tasks successfully checked/unchecked" , updatedTodo});
-    }
-    catch (err) {
-        res.status(401).json({
-            success: false,
-            message: err.message,
-        });
-    }
-};
-
-module.exports = {
-    addTask,
-    getTasks,
-    updateTask,
-    deleteTask,
-    checkTask,
-};

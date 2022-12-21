@@ -1,64 +1,58 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
-//sign
-const createUser = async (req, res) => {
-    console.log(req.body)
-    const { email, password } = req.body;
-    const userPresent = await User.findOne({ email })
-    //TODO
-    if (userPresent?.email) {
-        res.send("Try loggin in, already exist")
-    }
-    else {
-        try {
-            bcrypt.hash(password, 4, async function (err, hash) {
-                const user = new User({ email, password: hash })
-                await user.save()
-                res.send("Sign up successfull")
-            });
-
-        }
-        catch (err) {
-            console.log(err)
-            res.send("Something went wrong, pls try again later")
-        }
-    }
-
-}
-
-// const loginUser = async (req, res) => {
-//     const { email, password } = req.body;
-//     try {
-//         const user = await User.find({ email })
-
-//         if (user.length > 0) {
-//             const hashed_password = user[0].password;
-//             bcrypt.compare(password, hashed_password, function (err, result) {
-//                 if (result) {
-//                     const token = jwt.sign({ "userID": user[0]._id }, 'hash');
-//                     res.send({ "msg": "Login successfull", "token": token })
-//                 }
-//                 else {
-//                     res.send("Login failed")
-//                 }
-//             })
-//         }
-//         else {
-//             res.send("Login failed")
-//         }
-//     }
-//     catch {
-//         res.send("Something went wrong, please try again later")
-//     }
-// }
-
-// login user 
-
-const loginUser = async (req, res) => {
+// sign up 
+exports.createUserController = async (req, res) => {
     try {
 
+        const { name, email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (user)
+            throw new Error("Email already exists");
+
+        const salt = await bcrypt.genSalt(10);
+        const encryptedPassword = await bcrypt.hash(password, salt);
+
+        const newUser = await User.create({
+            name,
+            email,
+            password: encryptedPassword,
+
+        })
+
+        const data = {
+            id: newUser._id
+        }
+
+        const token = await jwt.sign(data, 'shhhhh');
+
+        const cratedUser = newUser;
+        cratedUser.password=undefined
+
+
+      res.status(200).cookie('token', token, {
+            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+            httpOnly: false
+        }).json({
+            success: "true",
+            token,
+            cratedUser
+        });
+    }
+    catch (err) {
+        res.status(401).json({
+            success: false,
+            message: err.message,
+        })
+    }
+}
+
+
+// login user 
+exports.loginUserController = async (req, res) => {
+    try {
+        
         const { email, password } = req.body;
         const isEmailExists = await User.findOne({ email });
         if (!isEmailExists)
@@ -76,7 +70,7 @@ const loginUser = async (req, res) => {
             id: user._id
         }
 
-        const token = await jwt.sign(data, 'hash');
+        const token = await jwt.sign(data, 'shhhhh');
 
         user.password = undefined;
         res.status(201).cookie('token', token, {
@@ -98,8 +92,9 @@ const loginUser = async (req, res) => {
     }
 }
 
+
 // get user 
-const getUser = async(req,res)=>{
+exports.getUserController = async(req,res)=>{
     try{
         const user = await User.findById(req.user.user_id);
         if(!user)
@@ -118,5 +113,3 @@ const getUser = async(req,res)=>{
         })
     }
 }
-
-module.exports = { createUser, loginUser, getUser };
