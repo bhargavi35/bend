@@ -30,44 +30,28 @@ exports.createUserController = async (req, res) => {
 
 // login user 
 exports.loginUserController = async (req, res) => {
+    const { email, password } = req.body;
     try {
-        
-        const { email, password } = req.body;
-        const isEmailExists = await User.findOne({ email });
-        if (!isEmailExists)
-            throw new Error("no such email found please sign up");
+        const user = await UserModel.find({ email })
 
-        const user = await User.findOne({ email });
-        // console.log(user)
-        const comparePassword = await bcrypt.compare(password, user.password);
-
-        if (!comparePassword)
-            throw new Error("wrong password");
-
-
-        const data = {
-            id: user._id
+        if (user.length > 0) {
+            const hashed_password = user[0].password;
+            bcrypt.compare(password, hashed_password, function (err, result) {
+                if (result) {
+                    const token = jwt.sign({ "userID": user[0]._id }, 'hush');
+                    res.send({ "msg": "Login successfull", "token": token })
+                }
+                else {
+                    res.send("Login failed")
+                }
+            })
         }
-
-        const token = await jwt.sign(data, 'shhhhh');
-
-        user.password = undefined;
-        res.status(201).cookie('token', token, {
-            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-            httpOnly: false
-        }).json({
-            success: true,
-            token,
-            user
-
-        })
-
+        else {
+            res.send("Login failed")
+        }
     }
-    catch (err) {
-        res.status(401).json({
-            success: false,
-            message: err.message,
-        })
+    catch {
+        res.send("Something went wrong, please try again later")
     }
 }
 
