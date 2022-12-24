@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 exports.createUserController = async (req, res) => {
     console.log(req.body)
     const { email, password } = req.body;
-    const userPresent = await UserModel.findOne({ email })
+    const userPresent = await User.findOne({ email })
     //TODO
     if (userPresent?.email) {
         res.send("Try loggin in, already exist")
@@ -14,7 +14,7 @@ exports.createUserController = async (req, res) => {
     else {
         try {
             bcrypt.hash(password, 4, async function (err, hash) {
-                const user = new UserModel({ email, password: hash })
+                const user = new User({ email, password: hash })
                 await user.save()
                 res.send("Sign up successfull")
             });
