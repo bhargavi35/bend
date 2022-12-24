@@ -38,7 +38,7 @@ exports.loginUserController = async (req, res) => {
             const hashed_password = user[0].password;
             bcrypt.compare(password, hashed_password, function (err, result) {
                 if (result) {
-                    const token = jwt.sign({ "userID": user[0]._id }, 'hush');
+                    const token = jwt.sign({ "userID": user[0]._id }, 'hash');
                     res.send({ "msg": "Login successfull", "token": token })
                 }
                 else {

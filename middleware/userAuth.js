@@ -12,7 +12,7 @@ const userAuth = (req, res, next)=>{
             })
         }
         
-        const users = jwt.verify(token,"shhhhh");
+        const users = jwt.verify(token,"hash");
 
         // console.log(users)
 
