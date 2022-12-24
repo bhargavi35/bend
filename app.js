@@ -18,6 +18,6 @@ connectToDb();
 
 app.use('/api',todoRoutes);
 app.use('/api', taskRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/auth', userRoutes);
 
 module.exports =  app;

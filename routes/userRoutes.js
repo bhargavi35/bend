@@ -3,8 +3,8 @@ const { createUserController, loginUserController, getUserController } = require
 const userAuth = require('../middleware/userAuth');
 const router = express.Router();
 
-router.post('/u/createUser',createUserController)
-router.post('/u/login',loginUserController)
+router.post('/signup',createUserController)
+router.post('/login',loginUserController)
 router.get('/u/getUser',userAuth,getUserController)
 
 module.exports = router;
