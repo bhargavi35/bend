@@ -32,7 +32,7 @@ exports.createUserController = async (req, res) => {
 exports.loginUserController = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await UserModel.find({ email })
+        const user = await User.find({ email })
 
         if (user.length > 0) {
             const hashed_password = user[0].password;
