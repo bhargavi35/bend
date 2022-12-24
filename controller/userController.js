@@ -4,47 +4,26 @@ const jwt = require('jsonwebtoken');
 
 // sign up 
 exports.createUserController = async (req, res) => {
-    try {
-
-        const { name, email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (user)
-            throw new Error("Email already exists");
-
-        const salt = await bcrypt.genSalt(10);
-        const encryptedPassword = await bcrypt.hash(password, salt);
-
-        const newUser = await User.create({
-            name,
-            email,
-            password: encryptedPassword,
-
-        })
-
-        const data = {
-            id: newUser._id
-        }
-
-        const token = await jwt.sign(data, 'shhhhh');
-
-        const cratedUser = newUser;
-        cratedUser.password=undefined
-
-
-      res.status(200).cookie('token', token, {
-            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-            httpOnly: false
-        }).json({
-            success: "true",
-            token,
-            cratedUser
-        });
+    console.log(req.body)
+    const { email, password } = req.body;
+    const userPresent = await UserModel.findOne({ email })
+    //TODO
+    if (userPresent?.email) {
+        res.send("Try loggin in, already exist")
     }
-    catch (err) {
-        res.status(401).json({
-            success: false,
-            message: err.message,
-        })
+    else {
+        try {
+            bcrypt.hash(password, 4, async function (err, hash) {
+                const user = new UserModel({ email, password: hash })
+                await user.save()
+                res.send("Sign up successfull")
+            });
+
+        }
+        catch (err) {
+            console.log(err)
+            res.send("Something went wrong, pls try again later")
+        }
     }
 }
 
